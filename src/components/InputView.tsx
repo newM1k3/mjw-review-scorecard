@@ -1,17 +1,14 @@
 import { useState } from 'react';
-import { Settings, Upload, Sparkles, AlertCircle } from 'lucide-react';
+import { Upload, Sparkles, AlertCircle } from 'lucide-react';
 import { parseCSVFile } from '../utils/parseReviews';
-import { getStoredApiKey } from '../utils/analyzeReviews';
 
 interface InputViewProps {
   onGenerate: (reviews: string) => void;
-  onOpenSettings: () => void;
 }
 
-export default function InputView({ onGenerate, onOpenSettings }: InputViewProps) {
+export default function InputView({ onGenerate }: InputViewProps) {
   const [reviewText, setReviewText] = useState('');
   const [error, setError] = useState('');
-  const hasApiKey = !!getStoredApiKey();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,11 +29,6 @@ export default function InputView({ onGenerate, onOpenSettings }: InputViewProps
   const handleGenerate = () => {
     setError('');
 
-    if (!hasApiKey) {
-      setError('Please set your OpenAI API key first');
-      return;
-    }
-
     if (!reviewText.trim()) {
       setError('Please paste some reviews or upload a CSV file');
       return;
@@ -48,14 +40,6 @@ export default function InputView({ onGenerate, onOpenSettings }: InputViewProps
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
-        <button
-          onClick={onOpenSettings}
-          className="absolute top-6 right-6 p-2 text-slate-600 hover:text-cyan-600 hover:bg-white rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-          title="Settings"
-        >
-          <Settings className="w-6 h-6" />
-        </button>
-
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-slate-900 mb-3">
             Review<span className="text-cyan-600">Scorecard</span>.io
@@ -106,18 +90,9 @@ export default function InputView({ onGenerate, onOpenSettings }: InputViewProps
             </div>
           )}
 
-          {!hasApiKey && (
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-amber-700">
-                Please set your OpenAI API key in settings (gear icon) before generating a scorecard.
-              </span>
-            </div>
-          )}
-
           <button
             onClick={handleGenerate}
-            disabled={!reviewText.trim() || !hasApiKey}
+            disabled={!reviewText.trim()}
             className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg font-semibold text-lg hover:from-cyan-700 hover:to-teal-700 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-xl flex items-center justify-center gap-2"
           >
             <Sparkles className="w-5 h-5" />
