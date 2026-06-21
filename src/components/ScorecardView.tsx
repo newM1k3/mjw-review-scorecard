@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Star, TrendingUp, TrendingDown, Minus, ThumbsUp, ThumbsDown, Share2, Download, RotateCcw, Check } from 'lucide-react';
 import type { ScorecardResult } from '../types';
 import { setResultInUrl } from '../utils/encodeDecodeResult';
+import LeadCaptureForm from './LeadCaptureForm';
+import { trackEvent } from '../lib/analytics';
 
 interface ScorecardViewProps {
   result: ScorecardResult;
@@ -15,6 +17,7 @@ export default function ScorecardView({ result, onAnalyzeMore, isReadOnly = fals
   const handleCopyLink = () => {
     const url = setResultInUrl(result);
     navigator.clipboard.writeText(url);
+    trackEvent('scorecard_shared', { overall_rating: result.overallRating });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -196,9 +199,12 @@ export default function ScorecardView({ result, onAnalyzeMore, isReadOnly = fals
           </div>
         </div>
 
+        {/* Funnel: the prospect who just analyzed their own reviews → capture + ImmersiveKit CTA */}
+        {!isReadOnly && <LeadCaptureForm result={result} />}
+
         {isReadOnly && (
           <div className="mt-6 text-center">
-            <p className="text-slate-600 mb-4">Want to analyze your own reviews?</p>
+            <p className="text-slate-600 mb-4">Want to analyze your own reviews — and turn them into bookings?</p>
             <a
               href="/"
               className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg"
