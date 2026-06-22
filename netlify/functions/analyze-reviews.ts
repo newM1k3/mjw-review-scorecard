@@ -1,8 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Handler } from '@netlify/functions';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 const SYSTEM_PROMPT = `You are an expert business analyst. Analyze these customer reviews. Return ONLY valid JSON matching this exact schema:
 {
   "overallRating": number,
@@ -25,6 +23,10 @@ const handler: Handler = async (event) => {
     if (!reviews || typeof reviews !== 'string' || reviews.trim().length === 0) {
       return { statusCode: 400, body: JSON.stringify({ error: 'No reviews provided for analysis' }) };
     }
+
+    // Instantiate per-request so a freshly-set ANTHROPIC_API_KEY is picked up without
+    // depending on a cold start (module-level init captured env once and went stale).
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
